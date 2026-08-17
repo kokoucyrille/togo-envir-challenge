@@ -110,11 +110,11 @@ def render_global_filters():
     st.session_state.setdefault("flt_pop", (0, int(pop_max)))
     st.session_state.setdefault("flt_undoc", False)
 
-    # Tout le bandeau de filtres (raccourcis, panneau détaillé, résumé et export) est
-    # regroupé dans un conteneur nommé : la clé "global_filters_bar" est reprise par le
-    # CSS (theme.py) pour l'épingler en haut de la zone de contenu (position "sticky"),
-    # afin qu'il reste visible quand on fait défiler le reste de la page.
-    with st.container(key="global_filters_bar"):
+    # --- Bloc filtres fixe (raccourcis + panneau de filtres) ---
+    # Placé dans un conteneur à clé stable ("sticky_filter_bar") afin de lui appliquer,
+    # via le CSS (voir theme.py), une position "sticky" : ce bloc reste accroché en haut
+    # de la page pendant le défilement, seul le contenu de la page défile en dessous.
+    with st.container(key="sticky_filter_bar"):
         # --- Raccourcis rapides (presets), toujours visibles au-dessus du panneau ---
         # Le raccourci actuellement actif (le cas échéant) est surligné (bouton "primary"),
         # pour que l'utilisateur sache toujours quel filtrage rapide est appliqué.
@@ -200,40 +200,40 @@ def render_global_filters():
                     key="flt_undoc",
                 )
 
-        filtered = cantons[cantons["region"].isin(sel_regions)]
-        if sel_prefectures:
-            filtered = filtered[filtered["prefecture"].isin(sel_prefectures)]
-        if sel_segments:
-            filtered = filtered[filtered["segment"].isin(sel_segments)]
-        filtered = filtered[(filtered["FRI"] >= sel_fri[0]) & (filtered["FRI"] <= sel_fri[1])]
-        filtered = filtered[(filtered["total_pop"] >= sel_pop[0]) & (filtered["total_pop"] <= sel_pop[1])]
-        if only_undocumented:
-            filtered = filtered[filtered["nb_ouvrages_documentes"] == 0]
+    filtered = cantons[cantons["region"].isin(sel_regions)]
+    if sel_prefectures:
+        filtered = filtered[filtered["prefecture"].isin(sel_prefectures)]
+    if sel_segments:
+        filtered = filtered[filtered["segment"].isin(sel_segments)]
+    filtered = filtered[(filtered["FRI"] >= sel_fri[0]) & (filtered["FRI"] <= sel_fri[1])]
+    filtered = filtered[(filtered["total_pop"] >= sel_pop[0]) & (filtered["total_pop"] <= sel_pop[1])]
+    if only_undocumented:
+        filtered = filtered[filtered["nb_ouvrages_documentes"] == 0]
 
-        # --- Résumé visuel (chips) + export, toujours visibles sous le panneau ---
-        summary_col, export_col = st.columns([4, 1])
-        with summary_col:
-            chips = [f"{format_number(len(filtered))}/{format_number(len(cantons))} " + t("cantons", "cantons")]
-            if set(sel_regions) != set(regions_all):
-                chips.append(t("Régions : ", "Regions: ") + (", ".join(sel_regions) if len(sel_regions) <= 3
-                              else f"{len(sel_regions)} " + t("sélectionnées", "selected")))
-            if sel_prefectures:
-                chips.append(t("Préfectures : ", "Prefectures: ") + str(len(sel_prefectures)))
-            if set(sel_segments) != set(segments_all):
-                chips.append(f"{len(sel_segments)} " + t("segment(s)", "segment(s)"))
-            if sel_fri != (round(fri_min, 2), round(fri_max, 2)):
-                chips.append(f"FRI {sel_fri[0]}–{sel_fri[1]}")
-            if only_undocumented:
-                chips.append(t("Sans ouvrage documenté", "No documented infrastructure"))
-            filter_chips(chips)
-        with export_col:
-            st.download_button(
-                t("Exporter (CSV)", "Export (CSV)"),
-                data=filtered.to_csv(index=False).encode("utf-8"),
-                file_name="cantons_selection.csv",
-                mime="text/csv",
-                use_container_width=True,
-            )
+    # --- Résumé visuel (chips) + export, toujours visibles sous le panneau ---
+    summary_col, export_col = st.columns([4, 1])
+    with summary_col:
+        chips = [f"{format_number(len(filtered))}/{format_number(len(cantons))} " + t("cantons", "cantons")]
+        if set(sel_regions) != set(regions_all):
+            chips.append(t("Régions : ", "Regions: ") + (", ".join(sel_regions) if len(sel_regions) <= 3
+                          else f"{len(sel_regions)} " + t("sélectionnées", "selected")))
+        if sel_prefectures:
+            chips.append(t("Préfectures : ", "Prefectures: ") + str(len(sel_prefectures)))
+        if set(sel_segments) != set(segments_all):
+            chips.append(f"{len(sel_segments)} " + t("segment(s)", "segment(s)"))
+        if sel_fri != (round(fri_min, 2), round(fri_max, 2)):
+            chips.append(f"FRI {sel_fri[0]}–{sel_fri[1]}")
+        if only_undocumented:
+            chips.append(t("Sans ouvrage documenté", "No documented infrastructure"))
+        filter_chips(chips)
+    with export_col:
+        st.download_button(
+            t("Exporter (CSV)", "Export (CSV)"),
+            data=filtered.to_csv(index=False).encode("utf-8"),
+            file_name="cantons_selection.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
 
     return {
         "cantons": filtered,
