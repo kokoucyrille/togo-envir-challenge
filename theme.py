@@ -377,9 +377,11 @@ BASE_CSS = f"""
 
     /* ---------- Bloc filtres fixe (raccourcis + panneau) ----------
        Le conteneur créé via st.container(key="sticky_filter_bar") reçoit la classe
-       .st-key-sticky_filter_bar. On le fixe en haut de la zone de défilement : il reste
-       visible pendant que le contenu de la page défile en dessous. */
-    .st-key-sticky_filter_bar {{
+       .st-key-sticky_filter_bar, mais Streamlit l'enveloppe lui-même dans un div
+       [data-testid="stLayoutWrapper"]. C'est ce wrapper englobant, et non le conteneur
+       lui-même, qu'il faut rendre "sticky" pour que la fixation fonctionne réellement
+       (sinon le sticky reste sans effet, "piégé" dans le wrapper interne). */
+    div[data-testid="stLayoutWrapper"]:has(> .st-key-sticky_filter_bar) {{
         position: sticky;
         top: 0;
         z-index: 999;
