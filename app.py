@@ -1,6 +1,9 @@
 import streamlit as st
 
-from components import inject_base_style, page_header, breadcrumb, footer_note, sidebar_brand, sidebar_nav
+from components import (
+    inject_base_style, page_header, breadcrumb, footer_note,
+    sidebar_brand, sidebar_nav, sidebar_language_toggle,
+)
 from filters import render_global_filters, get_default_state
 from data_loader import logo_path
 from i18n import t
@@ -63,20 +66,16 @@ PAGES = {key: (module, subtitle, needs_filters) for key, module, _, subtitle, ne
 LABELS = {key: label for key, _, label, _, _, _ in PAGE_DEFS}
 ICONS = {key: icon for key, _, _, _, _, icon in PAGE_DEFS}
 
-NAV_GROUPS = [
-    (t("Diagnostic", "Diagnosis"), ["overview", "map", "pressure", "flood", "coso"]),
-    (t("Décision", "Decision"), ["priority", "territories"]),
-    (t("Ressources", "Resources"), ["methodology", "about"]),
-]
-GROUP_OF_PAGE = {key: group_title for group_title, keys in NAV_GROUPS for key in keys}
-
 with st.sidebar:
     st.markdown('<hr class="sidebar-divider" />', unsafe_allow_html=True)
     default_page_key = st.session_state.get("page_key", PAGE_DEFS[0][0])
+    # Menu plat, sans regroupement par famille : les pages s'affichent dans l'ordre
+    # de PAGE_DEFS (diagnostic, puis décision, puis ressources).
     page_key = sidebar_nav(
-        [(title, [(k, LABELS[k], ICONS[k]) for k in keys]) for title, keys in NAV_GROUPS],
+        [(key, LABELS[key], ICONS[key]) for key, *_ in PAGE_DEFS],
         default_page_key,
     )
+    sidebar_language_toggle()
 
 module, subtitle, needs_filters = PAGES[page_key]
 
@@ -87,7 +86,7 @@ page_header(
     ),
     subtitle,
 )
-breadcrumb(GROUP_OF_PAGE.get(page_key, ""), LABELS[page_key])
+breadcrumb(t("Tableau de bord", "Dashboard"), LABELS[page_key])
 
 if needs_filters:
     state = render_global_filters()

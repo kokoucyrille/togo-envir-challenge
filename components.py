@@ -18,11 +18,13 @@ def _logo_b64() -> str:
     return base64.b64encode(p.read_bytes()).decode()
 
 
-def _language_toggle():
-    """Bascule FR / EN sous forme de deux boutons côte à côte (mêmes styles que la nav),
-    avec un espacement net entre l'étiquette « Langue » et les boutons pour éviter tout
+def sidebar_language_toggle():
+    """Bascule FR / EN sous forme de deux boutons côte à côte (mêmes styles que la nav).
+    Placée en bas du menu latéral, après la navigation, avec un liseré de séparation
+    et un espacement net entre l'étiquette « Langue » et les boutons pour éviter tout
     effet de collage."""
     current = get_lang()
+    st.sidebar.markdown('<hr class="sidebar-divider sidebar-divider-bottom" />', unsafe_allow_html=True)
     st.markdown('<div class="lang-toggle-wrap">', unsafe_allow_html=True)
     st.markdown(
         f"<div class='lang-toggle-label'>{t('Langue', 'Language')}</div>",
@@ -61,41 +63,29 @@ def sidebar_brand():
         """,
         unsafe_allow_html=True,
     )
-    _language_toggle()
 
 
-def sidebar_nav(groups, page_key: str) -> str:
-    """Navigation latérale groupée et compacte, avec icône par page, bouton actif
-    surligné (thème primaire), et repère visuel (liseré) sur le titre du groupe
-    contenant la page active — pour que l'utilisateur retrouve sa position même quand
-    le bouton actif n'est plus visible. L'ensemble tient sans ascenseur dans la
-    barre latérale standard.
+def sidebar_nav(items, page_key: str) -> str:
+    """Navigation latérale simple : liste plate de toutes les pages (icône + libellé),
+    sans regroupement par famille, pour une lecture directe de l'ensemble des rubriques
+    disponibles et un menu plus court à parcourir. Le bouton actif est surligné (thème
+    primaire) pour que l'utilisateur retrouve sa position en un coup d'œil.
 
-    groups : liste de (titre_groupe, [(clé, libellé_affiché, icône_material), ...])
+    items : liste de (clé, libellé_affiché, icône_material)
     Retourne la clé de la page sélectionnée (met à jour st.session_state au besoin).
     """
     st.sidebar.markdown('<div class="nav-block">', unsafe_allow_html=True)
-    for i, (group_title, items) in enumerate(groups):
-        is_active_group = any(key == page_key for key, _, _ in items)
-        css_classes = ["nav-group-title"]
-        if i != 0:
-            css_classes.append("nav-group-title-spaced")
-        if is_active_group:
-            css_classes.append("nav-group-title-active")
-        st.sidebar.markdown(
-            f'<div class="{" ".join(css_classes)}">{group_title}</div>', unsafe_allow_html=True
-        )
-        for key, label, icon in items:
-            is_active = key == page_key
-            if st.sidebar.button(
-                label,
-                key=f"nav_{key}",
-                icon=f":material/{icon}:",
-                use_container_width=True,
-                type="primary" if is_active else "secondary",
-            ):
-                st.session_state["page_key"] = key
-                st.rerun()
+    for key, label, icon in items:
+        is_active = key == page_key
+        if st.sidebar.button(
+            label,
+            key=f"nav_{key}",
+            icon=f":material/{icon}:",
+            use_container_width=True,
+            type="primary" if is_active else "secondary",
+        ):
+            st.session_state["page_key"] = key
+            st.rerun()
     st.sidebar.markdown('</div>', unsafe_allow_html=True)
     return st.session_state.get("page_key", page_key)
 

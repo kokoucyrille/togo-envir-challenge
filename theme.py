@@ -289,9 +289,10 @@ BASE_CSS = f"""
         margin-top: 1px;
     }}
 
-    /* Bascule de langue : espacement net entre l'étiquette et les boutons */
+    /* Bascule de langue : placée en bas du menu (après la navigation), avec un
+       espacement net entre l'étiquette et les boutons */
     .lang-toggle-wrap {{
-        margin-top: 10px;
+        margin-top: 2px;
     }}
     .lang-toggle-label {{
         text-align: center;
@@ -303,29 +304,14 @@ BASE_CSS = f"""
         margin-bottom: 8px;
     }}
 
-    /* Bloc de navigation : groupes resserrés, tenant sans ascenseur */
+    /* Bloc de navigation : liste plate (sans regroupement par famille), compacte,
+       tenant sans ascenseur */
     .nav-block {{
         margin-top: 4px;
     }}
-    .nav-group-title {{
-        font-size: 0.66rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        color: {GREY};
-        margin: 0 4px 4px 4px;
-        padding-left: 9px;
-        border-left: 3px solid transparent;
-        transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
-    }}
-    .nav-group-title-spaced {{
-        margin-top: 10px;
-        padding-top: 8px;
-        border-top: 1px solid {BORDER};
-    }}
-    .nav-group-title-active {{
-        color: {GREEN_DARK};
-        border-left-color: {GOLD};
+    /* Séparateur avant la bascule de langue, en bas du menu latéral */
+    section[data-testid="stSidebar"] hr.sidebar-divider-bottom {{
+        margin-top: 12px;
     }}
     section[data-testid="stSidebar"] div[data-testid="stButton"] > button {{
         text-align: left;

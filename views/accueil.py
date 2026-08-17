@@ -29,19 +29,21 @@ def render(state):
     guide_box(t(
         "<b>Comment lire ce tableau de bord</b>"
         "<ol>"
-        "<li>Le menu latéral regroupe les pages en trois familles : <b>Diagnostic</b> (constat), "
-        "<b>Décision</b> (priorisation) et <b>Ressources</b> (méthode, contexte).</li>"
+        "<li>Le menu latéral liste toutes les pages du tableau de bord : le <b>constat</b> "
+        "(vue d'ensemble, cartographie, pression, inondation, projets COSO), la <b>priorisation</b> "
+        "(priorisation, territoires), puis les pages de <b>ressources</b> (méthodologie, à propos).</li>"
         "<li>Les <b>filtres du territoire</b>, sous chaque page, s'appliquent à l'ensemble du "
         "tableau de bord et restent actifs quand vous changez de page.</li>"
-        "<li>La bascule <b>FR / EN</b> se trouve en haut du menu latéral.</li>"
+        "<li>La bascule <b>FR / EN</b> se trouve en bas du menu latéral.</li>"
         "</ol>",
         "<b>How to read this dashboard</b>"
         "<ol>"
-        "<li>The sidebar groups pages into three families: <b>Diagnosis</b> (findings), "
-        "<b>Decision</b> (prioritization) and <b>Resources</b> (method, context).</li>"
+        "<li>The sidebar lists every page of the dashboard: the <b>findings</b> "
+        "(overview, map, pressure, flood, COSO projects), <b>prioritization</b> "
+        "(priority, territories), then the <b>resources</b> pages (methodology, about).</li>"
         "<li>The <b>territory filters</b>, under each page, apply to the whole dashboard and "
         "stay active when you switch pages.</li>"
-        "<li>The <b>FR / EN</b> toggle is at the top of the sidebar.</li>"
+        "<li>The <b>FR / EN</b> toggle is at the bottom of the sidebar.</li>"
         "</ol>",
     ))
 
