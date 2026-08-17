@@ -376,6 +376,21 @@ BASE_CSS = f"""
     }}
 
     /* ---------- Filtres ---------- */
+    /* Bandeau de filtres globaux : reste visible en haut de la zone de contenu
+       pendant le défilement (position "sticky" par rapport au conteneur scrollable
+       de Streamlit), au lieu de défiler avec le reste de la page. Le fond opaque et
+       l'ombre portée le détachent visuellement du contenu qui défile en dessous. */
+    .st-key-global_filters_bar {{
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        background: white;
+        padding: 10px 0 12px 0;
+        margin: 0 0 18px 0;
+        border-bottom: 1px solid {BORDER};
+        box-shadow: 0 6px 12px -6px rgba(24, 36, 32, 0.12);
+    }}
+
     .filter-summary {{
         display: flex;
         flex-wrap: wrap;

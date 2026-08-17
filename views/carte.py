@@ -9,24 +9,20 @@ from i18n import t, get_lang
 
 
 def _layer_options():
-    """Couches disponibles, indexées par identifiant de colonne STABLE (indépendant de la
-    langue). Auparavant la clé du dict était le libellé traduit lui-même : changer de langue
-    changeait l'ensemble des options du sélecteur (widget sans key), ce qui réinitialisait
-    silencieusement la couche choisie à la première option à chaque bascule FR/EN."""
     if get_lang() == "en":
         return {
-            "priority_score": ("Priority score (Priority Score)", "OrRd", "Priority score"),
-            "FRI": ("Flood risk (FRI)", "YlOrRd", "FRI (0-1)"),
-            "total_pop": ("Estimated population", "Greens", "Population"),
-            "ouvrages_pour_10000_hab": ("Documented infrastructure / 10,000 inh.", "Blues", "Infrastructure / 10,000 inh."),
-            "pression_actuelle": ("Current demographic pressure", "PuRd", "Pressure (inh./infrastructure)"),
+            "Priority score (Priority Score)": ("priority_score", "OrRd", "Priority score"),
+            "Flood risk (FRI)": ("FRI", "YlOrRd", "FRI (0-1)"),
+            "Estimated population": ("total_pop", "Greens", "Population"),
+            "Documented infrastructure / 10,000 inh.": ("ouvrages_pour_10000_hab", "Blues", "Infrastructure / 10,000 inh."),
+            "Current demographic pressure": ("pression_actuelle", "PuRd", "Pressure (inh./infrastructure)"),
         }
     return {
-        "priority_score": ("Score de priorité (Priority Score)", "OrRd", "Score de priorité"),
-        "FRI": ("Risque d'inondation (FRI)", "YlOrRd", "FRI (0-1)"),
-        "total_pop": ("Population estimée", "Greens", "Population"),
-        "ouvrages_pour_10000_hab": ("Ouvrages documentés / 10 000 hab.", "Blues", "Ouvrages / 10 000 hab."),
-        "pression_actuelle": ("Pression démographique actuelle", "PuRd", "Pression (hab./ouvrage)"),
+        "Score de priorité (Priority Score)": ("priority_score", "OrRd", "Score de priorité"),
+        "Risque d'inondation (FRI)": ("FRI", "YlOrRd", "FRI (0-1)"),
+        "Population estimée": ("total_pop", "Greens", "Population"),
+        "Ouvrages documentés / 10 000 hab.": ("ouvrages_pour_10000_hab", "Blues", "Ouvrages / 10 000 hab."),
+        "Pression démographique actuelle": ("pression_actuelle", "PuRd", "Pression (hab./ouvrage)"),
     }
 
 
@@ -45,25 +41,20 @@ def render(state):
 
     ctrl1, ctrl2, ctrl3 = st.columns([1.4, 1, 1])
     with ctrl1:
-        layer_column = st.selectbox(
-            t("Couche de fond (choropleth par canton)", "Background layer (choropleth by canton)"),
-            list(layer_options.keys()),
-            format_func=lambda cid: layer_options[cid][0],
-            key="carte_layer",
-        )
+        layer_label = st.selectbox(t("Couche de fond (choropleth par canton)", "Background layer (choropleth by canton)"),
+                                    list(layer_options.keys()))
     with ctrl2:
-        show_tde = st.checkbox(t("Afficher les ouvrages TdE", "Show TdE infrastructure"), value=True, key="carte_show_tde")
+        show_tde = st.checkbox(t("Afficher les ouvrages TdE", "Show TdE infrastructure"), value=True)
     with ctrl3:
-        show_coso = st.checkbox(t("Afficher les sous-projets COSO", "Show COSO sub-projects"), value=True, key="carte_show_coso")
+        show_coso = st.checkbox(t("Afficher les sous-projets COSO", "Show COSO sub-projects"), value=True)
 
     only_exposed = st.checkbox(
         t("N'afficher que les ouvrages exposés à un risque d'inondation élevé",
           "Show only infrastructure exposed to high flood risk"),
-        value=False, key="carte_only_exposed",
+        value=False,
     )
 
-    column = layer_column
-    _, scale, label = layer_options[column]
+    column, scale, label = layer_options[layer_label]
 
     if len(cantons_f) == 0:
         st.warning(t("Aucun canton ne correspond aux filtres sélectionnés dans la barre latérale.",
