@@ -1,7 +1,7 @@
 import plotly.express as px
 import streamlit as st
 
-from components import section_title, format_number
+from components import section_title, format_number, kpi_card
 from data_loader import load_coso_full
 from theme import PLOTLY_TEMPLATE, GREEN, GOLD
 from i18n import t, get_lang, translate_series, STADE_LABELS_EN
@@ -41,15 +41,27 @@ def render(state):
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.metric(t("Sous-projets (sélection)", "Sub-projects (selection)"), format_number(len(dff)))
+        kpi_card(
+            t("Sous-projets (sélection)", "Sub-projects (selection)"), format_number(len(dff)),
+            t("Selon les filtres actifs", "Based on active filters"), icon="project",
+        )
     with c2:
-        st.metric(t("Coût total estimé", "Total estimated cost"),
-                   format_number(dff["estimated_cost"].sum() / 1_000_000, 1) + t(" M FCFA", "M FCFA"))
+        kpi_card(
+            t("Coût total estimé", "Total estimated cost"),
+            format_number(dff["estimated_cost"].sum() / 1_000_000, 1) + t(" M FCFA", "M FCFA"),
+            t("Cumul de la sélection", "Sum of the selection"), variant="gold", icon="cost",
+        )
     with c3:
-        st.metric(t("Bénéficiaires cumulés", "Cumulative beneficiaries"), format_number(dff["beneficiaires_totaux"].sum()))
+        kpi_card(
+            t("Bénéficiaires cumulés", "Cumulative beneficiaries"), format_number(dff["beneficiaires_totaux"].sum()),
+            t("Population desservie estimée", "Estimated population served"), variant="grey", icon="population",
+        )
     with c4:
         def_rate = (dff["stade_reception"] == "Reception definitive").mean() * 100 if len(dff) else 0
-        st.metric(t("Part en réception définitive", "Share with final acceptance"), f"{def_rate:.1f} %")
+        kpi_card(
+            t("Part en réception définitive", "Share with final acceptance"), f"{def_rate:.1f} %",
+            t("Sous-projets achevés", "Completed sub-projects"), icon="check",
+        )
 
     section_title(t("Statut des sous-projets", "Sub-project status"))
     col1, col2 = st.columns(2)

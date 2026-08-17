@@ -1,7 +1,7 @@
 import plotly.express as px
 import streamlit as st
 
-from components import section_title, note_box, format_number
+from components import section_title, note_box, format_number, kpi_card
 from data_loader import load_kpi_national, load_tde_points, load_coso_points, load_region_stats
 from theme import PLOTLY_TEMPLATE, REGION_COLORS
 from i18n import t, get_lang
@@ -27,16 +27,28 @@ def render(state):
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.metric(t("Seuil FRI risque élevé (75e pct.)", "High-risk FRI threshold (75th pct.)"),
-                   f"{kpi['seuil_fri_risque_eleve']:.3f}")
+        kpi_card(
+            t("Seuil FRI risque élevé (75e pct.)", "High-risk FRI threshold (75th pct.)"),
+            f"{kpi['seuil_fri_risque_eleve']:.3f}",
+            t("Référence nationale", "National reference"), variant="grey", icon="gauge",
+        )
     with c2:
         part_eleve = (cantons_f["risque_eleve"]).mean() * 100
-        st.metric(t("Cantons à risque élevé (sélection)", "High-risk cantons (selection)"), f"{part_eleve:.1f} %")
+        kpi_card(
+            t("Cantons à risque élevé (sélection)", "High-risk cantons (selection)"), f"{part_eleve:.1f} %",
+            t("Sur la sélection filtrée", "Within the filtered selection"), variant="red", icon="warning",
+        )
     with c3:
-        st.metric(t("Ouvrages exposés (national)", "Exposed infrastructure (national)"),
-                   f"{kpi['part_ouvrages_exposes_risque_eleve_%']:.1f} %")
+        kpi_card(
+            t("Ouvrages exposés (national)", "Exposed infrastructure (national)"),
+            f"{kpi['part_ouvrages_exposes_risque_eleve_%']:.1f} %",
+            t("Ensemble du pays", "Countrywide"), variant="red", icon="flood",
+        )
     with c4:
-        st.metric(t("FRI moyen national", "National average FRI"), f"{kpi['fri_moyen_national']:.3f}")
+        kpi_card(
+            t("FRI moyen national", "National average FRI"), f"{kpi['fri_moyen_national']:.3f}",
+            t("Indice composite (0 à 1)", "Composite index (0 to 1)"), variant="gold", icon="gauge",
+        )
 
     section_title(t("Distribution du risque d'inondation", "Flood risk distribution"))
     col1, col2 = st.columns(2)
@@ -78,9 +90,15 @@ def render(state):
     coso_exp = coso["expose_risque_eleve"].mean() * 100 if len(coso) else 0
     col3, col4 = st.columns(2)
     with col3:
-        st.metric(t("Part des ouvrages TdE exposés", "Share of exposed TdE infrastructure"), f"{tde_exp:.1f} %")
+        kpi_card(
+            t("Part des ouvrages TdE exposés", "Share of exposed TdE infrastructure"), f"{tde_exp:.1f} %",
+            t("Points TdE à risque élevé", "TdE points at high risk"), variant="red", icon="flood",
+        )
     with col4:
-        st.metric(t("Part des sous-projets COSO exposés", "Share of exposed COSO sub-projects"), f"{coso_exp:.1f} %")
+        kpi_card(
+            t("Part des sous-projets COSO exposés", "Share of exposed COSO sub-projects"), f"{coso_exp:.1f} %",
+            t("Sous-projets COSO à risque élevé", "COSO sub-projects at high risk"), variant="red", icon="flood",
+        )
 
     note_box(t(
         "La carte croisant risque d'inondation et infrastructures documentées (page Cartographie) montre que "

@@ -130,6 +130,15 @@ KPI_ICONS = {
     "target": '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
     "trend": '<path d="M3.5 17 10 10.5l4 4 6.5-7.5"/><path d="M15 6.5h5.5V12"/>',
     "flag": '<path d="M6 21V4"/><path d="M6 4.5c1.6-1.2 3.4-1.2 5 0s3.4 1.2 5 0v9c-1.6 1.2-3.4 1.2-5 0s-3.4-1.2-5 0Z"/>',
+    # ---- Icônes complémentaires (pages Pression, COSO, Inondation) ----
+    "flood": ('<path d="M12 3v10"/><path d="M8.5 9.5 12 13l3.5-3.5"/>'
+              '<path d="M2.5 18c1.8-1.8 3.6-1.8 5.4 0s3.6 1.8 5.4 0 3.6-1.8 5.4 0 3.6 1.8 5.4 0"/>'),
+    "cost": ('<rect x="2.5" y="6.5" width="19" height="11" rx="2"/><circle cx="12" cy="12" r="2.6"/>'
+             '<path d="M5.5 9.5h0M18.5 14.5h0" stroke-width="2.6"/>'),
+    "check": '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3 10.7 15 16 9"/>',
+    "project": '<path d="M4 20.5V10l8-6 8 6v10.5"/><path d="M9.5 20.5v-6.5h5v6.5"/><path d="M4 20.5h16"/>',
+    "pressure": ('<circle cx="12" cy="12" r="2"/><path d="M12 3v5"/><path d="M9.2 5.8 12 3l2.8 2.8"/>'
+                 '<path d="M12 21v-5"/><path d="M9.2 18.2 12 21l2.8-2.8"/>'),
 }
 
 

@@ -1,7 +1,7 @@
 import plotly.express as px
 import streamlit as st
 
-from components import section_title, note_box, warn_box, format_number
+from components import section_title, note_box, warn_box, format_number, kpi_card
 from data_loader import load_region_stats
 from theme import PLOTLY_TEMPLATE, REGION_COLORS
 from i18n import t, get_lang
@@ -26,14 +26,27 @@ def render(state):
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.metric(t("Population totale (sélection)", "Total population (selection)"),
-                   format_number(cantons_f["total_pop"].sum() / 1_000_000, 2) + (" M hab." if get_lang() == "fr" else " M inh."))
+        kpi_card(
+            t("Population totale (sélection)", "Total population (selection)"),
+            format_number(cantons_f["total_pop"].sum() / 1_000_000, 2) + (" M hab." if get_lang() == "fr" else " M inh."),
+            t("Cantons de la sélection filtrée", "Cantons in the filtered selection"),
+            variant="gold", icon="population",
+        )
     with c2:
         sans_ouvrage = (cantons_f["nb_ouvrages_documentes"] == 0).mean() * 100
-        st.metric(t("Cantons sans ouvrage documenté", "Cantons with no documented infrastructure"), f"{sans_ouvrage:.1f} %")
+        kpi_card(
+            t("Cantons sans ouvrage documenté", "Cantons with no documented infrastructure"),
+            f"{sans_ouvrage:.1f} %",
+            t("Sur la sélection filtrée", "Within the filtered selection"),
+            variant="red", icon="warning",
+        )
     with c3:
-        st.metric(t("Pression médiane (hab./ouvrage)", "Median pressure (inh./infrastructure)"),
-                   format_number(cantons_f["pression_actuelle"].median()))
+        kpi_card(
+            t("Pression médiane (hab./ouvrage)", "Median pressure (inh./infrastructure)"),
+            format_number(cantons_f["pression_actuelle"].median()),
+            t("Habitants par ouvrage documenté", "Inhabitants per documented infrastructure"),
+            icon="pressure",
+        )
 
     section_title(t("Population et ouvrages documentés par région", "Population and documented infrastructure by region"))
     region_stats = load_region_stats()
