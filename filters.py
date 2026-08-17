@@ -5,24 +5,45 @@ filtrage en un clic (presets), état persistant via st.session_state (les
 choix restent identiques quand on change de page), et export CSV de la
 sélection courante.
 """
+import math
+
 import streamlit as st
 
 from components import filter_chips, format_number
 from data_loader import load_cantons
-from i18n import t
+from i18n import t, translate_value, SEGMENT_LABELS_EN
+
+
+def _fri_bounds(fri_min: float, fri_max: float):
+    """Bornes du curseur FRI, arrondies vers l'EXTÉRIEUR (floor/ceil) et non au plus
+    proche : un round() classique peut resserrer la borne (ex. min réel 0.0074 -> 0.01)
+    et exclure silencieusement des cantons du jeu de données même quand aucun filtre
+    n'est actif."""
+    return (
+        math.floor(fri_min * 100) / 100,
+        math.ceil(fri_max * 100) / 100,
+    )
+
+
+def _pop_max_bound(pop_max: float) -> int:
+    """Borne haute du curseur population, arrondie vers le HAUT (ceil) : un int() tronque
+    et peut exclure le canton le plus peuplé (ex. 429551.98 -> 429551) alors qu'aucun
+    filtre n'est censé être actif."""
+    return math.ceil(pop_max)
 
 
 def get_default_state():
     """État non filtré, utilisé sur les pages qui n'ont pas besoin de filtres (À propos, Méthodologie)."""
     cantons = load_cantons()
+    fri_min, fri_max = _fri_bounds(float(cantons["FRI"].min()), float(cantons["FRI"].max()))
     return {
         "cantons": cantons,
         "cantons_unfiltered": cantons,
         "regions": sorted(cantons["region"].dropna().unique().tolist()),
         "prefectures": [],
         "segments": sorted(cantons["segment"].dropna().unique().tolist()),
-        "fri_range": (float(cantons["FRI"].min()), float(cantons["FRI"].max())),
-        "pop_range": (0, int(cantons["total_pop"].max())),
+        "fri_range": (fri_min, fri_max),
+        "pop_range": (0, _pop_max_bound(float(cantons["total_pop"].max()))),
         "only_undocumented": False,
     }
 
@@ -32,12 +53,13 @@ def _preset_state(preset: str, cantons, fri_min, fri_max, pop_max):
     Sert uniquement à détecter si ce raccourci est déjà actif, pour le surligner."""
     regions_all = sorted(cantons["region"].dropna().unique().tolist())
     segments_all = sorted(cantons["segment"].dropna().unique().tolist())
+    fri_lo, fri_hi = _fri_bounds(fri_min, fri_max)
     base = {
         "flt_regions": regions_all,
         "flt_prefectures": [],
         "flt_segments": segments_all,
-        "flt_fri": (round(fri_min, 2), round(fri_max, 2)),
-        "flt_pop": (0, int(pop_max)),
+        "flt_fri": (fri_lo, fri_hi),
+        "flt_pop": (0, _pop_max_bound(pop_max)),
         "flt_undoc": False,
     }
     if preset == "critical":
@@ -45,8 +67,8 @@ def _preset_state(preset: str, cantons, fri_min, fri_max, pop_max):
     elif preset == "undocumented":
         base["flt_undoc"] = True
     elif preset == "flood":
-        flood_threshold = round(fri_min + 0.7 * (fri_max - fri_min), 2)
-        base["flt_fri"] = (flood_threshold, round(fri_max, 2))
+        flood_threshold = round(fri_lo + 0.7 * (fri_hi - fri_lo), 2)
+        base["flt_fri"] = (flood_threshold, fri_hi)
     return base
 
 
@@ -62,43 +84,47 @@ def _apply_preset(preset: str, cantons, fri_min, fri_max, pop_max):
     """Pré-remplit les clés de session_state AVANT instanciation des widgets, puis rerun."""
     regions_all = sorted(cantons["region"].dropna().unique().tolist())
     segments_all = sorted(cantons["segment"].dropna().unique().tolist())
+    fri_lo, fri_hi = _fri_bounds(fri_min, fri_max)
+    pop_hi = _pop_max_bound(pop_max)
 
     if preset == "reset":
         st.session_state["flt_regions"] = regions_all
         st.session_state["flt_prefectures"] = []
         st.session_state["flt_segments"] = segments_all
-        st.session_state["flt_fri"] = (round(fri_min, 2), round(fri_max, 2))
-        st.session_state["flt_pop"] = (0, int(pop_max))
+        st.session_state["flt_fri"] = (fri_lo, fri_hi)
+        st.session_state["flt_pop"] = (0, pop_hi)
         st.session_state["flt_undoc"] = False
     elif preset == "critical":
         st.session_state["flt_regions"] = regions_all
         st.session_state["flt_prefectures"] = []
         st.session_state["flt_segments"] = ["Nouveaux ouvrages prioritaires"]
-        st.session_state["flt_fri"] = (round(fri_min, 2), round(fri_max, 2))
-        st.session_state["flt_pop"] = (0, int(pop_max))
+        st.session_state["flt_fri"] = (fri_lo, fri_hi)
+        st.session_state["flt_pop"] = (0, pop_hi)
         st.session_state["flt_undoc"] = False
     elif preset == "undocumented":
         st.session_state["flt_regions"] = regions_all
         st.session_state["flt_prefectures"] = []
         st.session_state["flt_segments"] = segments_all
-        st.session_state["flt_fri"] = (round(fri_min, 2), round(fri_max, 2))
-        st.session_state["flt_pop"] = (0, int(pop_max))
+        st.session_state["flt_fri"] = (fri_lo, fri_hi)
+        st.session_state["flt_pop"] = (0, pop_hi)
         st.session_state["flt_undoc"] = True
     elif preset == "flood":
-        flood_threshold = round(fri_min + 0.7 * (fri_max - fri_min), 2)
+        flood_threshold = round(fri_lo + 0.7 * (fri_hi - fri_lo), 2)
         st.session_state["flt_regions"] = regions_all
         st.session_state["flt_prefectures"] = []
         st.session_state["flt_segments"] = segments_all
-        st.session_state["flt_fri"] = (flood_threshold, round(fri_max, 2))
-        st.session_state["flt_pop"] = (0, int(pop_max))
+        st.session_state["flt_fri"] = (flood_threshold, fri_hi)
+        st.session_state["flt_pop"] = (0, pop_hi)
         st.session_state["flt_undoc"] = False
     st.rerun()
 
 
 def render_global_filters():
     cantons = load_cantons()
-    fri_min, fri_max = float(cantons["FRI"].min()), float(cantons["FRI"].max())
-    pop_max = float(cantons["total_pop"].max())
+    fri_min_raw, fri_max_raw = float(cantons["FRI"].min()), float(cantons["FRI"].max())
+    fri_min, fri_max = _fri_bounds(fri_min_raw, fri_max_raw)
+    pop_max_raw = float(cantons["total_pop"].max())
+    pop_max = _pop_max_bound(pop_max_raw)
     regions_all = sorted(cantons["region"].dropna().unique().tolist())
     segments_all = sorted(cantons["segment"].dropna().unique().tolist())
 
@@ -106,8 +132,8 @@ def render_global_filters():
     st.session_state.setdefault("flt_regions", regions_all)
     st.session_state.setdefault("flt_prefectures", [])
     st.session_state.setdefault("flt_segments", segments_all)
-    st.session_state.setdefault("flt_fri", (round(fri_min, 2), round(fri_max, 2)))
-    st.session_state.setdefault("flt_pop", (0, int(pop_max)))
+    st.session_state.setdefault("flt_fri", (fri_min, fri_max))
+    st.session_state.setdefault("flt_pop", (0, pop_max))
     st.session_state.setdefault("flt_undoc", False)
 
     # --- Raccourcis rapides (presets), toujours visibles au-dessus du panneau ---
@@ -142,9 +168,9 @@ def render_global_filters():
         active += 1
     if set(st.session_state["flt_segments"]) != set(segments_all):
         active += 1
-    if st.session_state["flt_fri"] != (round(fri_min, 2), round(fri_max, 2)):
+    if st.session_state["flt_fri"] != (fri_min, fri_max):
         active += 1
-    if st.session_state["flt_pop"] != (0, int(pop_max)):
+    if st.session_state["flt_pop"] != (0, pop_max):
         active += 1
     if st.session_state["flt_undoc"]:
         active += 1
@@ -173,20 +199,21 @@ def render_global_filters():
         with row1_c3:
             sel_segments = st.multiselect(
                 t("Catégorie d'action (segment)", "Action category (segment)"), segments_all, key="flt_segments",
+                format_func=lambda s: translate_value(s, SEGMENT_LABELS_EN),
             )
 
         row2_c1, row2_c2, row2_c3 = st.columns(3)
         with row2_c1:
             sel_fri = st.slider(
                 t("Indice de risque d'inondation (FRI)", "Flood risk index (FRI)"),
-                min_value=round(fri_min, 2), max_value=round(fri_max, 2),
+                min_value=fri_min, max_value=fri_max,
                 key="flt_fri",
                 help=t("0 = aucun risque, 1 = risque maximal", "0 = no risk, 1 = maximum risk"),
             )
         with row2_c2:
             sel_pop = st.slider(
                 t("Population estimée du canton", "Estimated canton population"),
-                min_value=0, max_value=int(pop_max), step=1000, format="%d",
+                min_value=0, max_value=pop_max, step=1000, format="%d",
                 key="flt_pop",
             )
         with row2_c3:
@@ -216,7 +243,7 @@ def render_global_filters():
             chips.append(t("Préfectures : ", "Prefectures: ") + str(len(sel_prefectures)))
         if set(sel_segments) != set(segments_all):
             chips.append(f"{len(sel_segments)} " + t("segment(s)", "segment(s)"))
-        if sel_fri != (round(fri_min, 2), round(fri_max, 2)):
+        if sel_fri != (fri_min, fri_max):
             chips.append(f"FRI {sel_fri[0]}–{sel_fri[1]}")
         if only_undocumented:
             chips.append(t("Sans ouvrage documenté", "No documented infrastructure"))
