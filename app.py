@@ -67,7 +67,7 @@ LABELS = {key: label for key, _, label, _, _, _ in PAGE_DEFS}
 ICONS = {key: icon for key, _, _, _, _, icon in PAGE_DEFS}
 
 with st.sidebar:
-    st.markdown('<hr class="sidebar-divider" />', unsafe_allow_html=True)
+    st.markdown('<hr class="sidebar-divider sidebar-divider-top" />', unsafe_allow_html=True)
     default_page_key = st.session_state.get("page_key", PAGE_DEFS[0][0])
     # Menu plat, sans regroupement par famille : les pages s'affichent dans l'ordre
     # de PAGE_DEFS (diagnostic, puis décision, puis ressources).

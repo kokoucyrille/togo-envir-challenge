@@ -259,13 +259,17 @@ BASE_CSS = f"""
         margin: 0.7rem 0 0.6rem 0;
         border-color: {BORDER};
     }}
+    section[data-testid="stSidebar"] hr.sidebar-divider-top {{
+        margin: 0.9rem 0 1rem 0;
+    }}
 
-    /* Bloc identité (logo + nom), compact et sur une seule ligne */
+    /* Bloc identité (logo + nom), compact et sur une seule ligne, avec un peu
+       d'air sous le texte pour bien le détacher du menu qui suit */
     .sidebar-brand {{
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 2px 2px 0 2px;
+        padding: 2px 2px 6px 2px;
     }}
     .sidebar-brand-logo {{
         width: 42px;
